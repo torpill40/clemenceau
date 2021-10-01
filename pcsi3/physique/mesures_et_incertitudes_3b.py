@@ -1,8 +1,8 @@
 import numpy as np
 
 
-def distance(x1, x2):
-    return x1 - x2
+def distance(x_1, x_2):
+    return x_1 - x_2
 
 
 N = 10_000_000
