@@ -42,7 +42,7 @@ def perf(f, L):
     return t1 - t0, ret
 
 
-N = 5_000
+N = 1_000
 range_N = range(N)
 L1 = [rint(0, N * 10) for _ in range_N]
 # L1 = [N - i for i in range(N)]
