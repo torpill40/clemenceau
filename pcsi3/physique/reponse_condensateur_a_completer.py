@@ -1,7 +1,6 @@
 ####################################################
-#  Réponse d'un système linéaire du premier ordre  #
+## Réponse d'un système linéaire du premier ordre ##
 ####################################################
-import numpy as np
 from pylab import *  # numpy est chargé avec l'alias np
 from scipy import *  # non utilisé ici
 
@@ -17,7 +16,7 @@ def euler(F, x0, t0, t1, pas):  # Algorithme d'EULER explicite
 
 
 #################################
-#  Cas a : charge du condensateur
+## Cas a : charge du condensateur
 #################################
 # Définition des paramètres
 E = 10.
@@ -43,10 +42,12 @@ def solan1(t0, t1, pas):
 
 
 # Tracé de la figure
-plt.figure(figsize=(13, 4))
-plt.subplot(1, 3, 1)
-T, u = euler(f1, u0, 0, 10 * tau, tau / 100)  # Tracé de la solution numérique (Euler)
-plt.plot(T, u, label="Euler, pas = tau/100")
+plt.figure(figsize=(13, 5))
+plt.subplot(1, 2, 1)
+T, u = euler(f1, u0, 0, 10 * tau, tau / 5)  # Tracé de la solution numérique (Euler)
+plt.plot(T, u, label="Euler, pas = tau/5", color="lightsteelblue")
+T, u = euler(f1, u0, 0, 10 * tau, tau / 10)
+plt.plot(T, u, label="Euler, pas = tau/10")
 TT, v = solan1(0, 10 * tau, tau / 100)  # Tracé de la solution analytique
 plt.plot(TT, v, label="Solution analytique", linestyle='--')
 plt.legend()
@@ -55,12 +56,10 @@ plt.ylabel('tension (V)')
 plt.title('Charge du condensateur')
 
 #################################
-#  Cas b : régime libre
+## Cas b : régime libre
 #################################
 # Définition des paramètres
 u0 = E
-
-
 # E, R, C et tau restent inchangés
 
 
@@ -80,22 +79,25 @@ def solan2(t0, t1, pas):
 
 
 # Tracé de la figure
-plt.subplot(1, 3, 2)
-T, u = euler(f2, u0, 0, 10 * tau, tau / 100)
-plt.plot(T, u, label="Euler, pas = tau/100")
+plt.subplot(1, 2, 2)
+T, u = euler(f2, u0, 0, 10 * tau, tau / 5)
+plt.plot(T, u, label="Euler, pas = tau/5", color="lightsteelblue")
+T, u = euler(f2, u0, 0, 10 * tau, tau / 10)
+plt.plot(T, u, label="Euler, pas = tau/10")
 TT, v = solan2(0, 10 * tau, tau / 100)
 plt.plot(TT, v, label="Solution analytique", ls="--")
 plt.legend()
 plt.xlabel("temps(s)")
 plt.ylabel("tension (V)")
 plt.title("Décharge du condensateur")
+plt.show()
 
 #################################
-#  Cas c : excitation sinusoïdale
+## Cas c : excitation sinusoïdale
 #################################
 # Définition des paramètres
 u0 = 0.
-omega = 1.e-5
+omega = 3.e5
 # E, R, C et tau restent inchangés par rapport au cas précédent
 
 
@@ -115,15 +117,16 @@ def solan3(t0, t1, pas):
     T = np.linspace(t0, t1, n + 1)
     x = np.zeros(n + 1)
     for i in range(n + 1):
-        x[i] = -E * np.exp(-T[i] / tau)\
-            + (E * np.cos(omega * T[i]) + tau * omega * E * np.sin(omega * T[i])) / (tau ** 2 * omega ** 2 + 1)
+        x[i] = E / (tau ** 2 * omega ** 2 + 1) * ((np.cos(omega * T[i]) + tau * omega * np.sin(omega * T[i])) - np.exp(-T[i] / tau))
     return T, x
 
 
 # Tracé de la figure
-plt.subplot(1, 3, 3)
-T, u = euler(f3, u0, 0, 10 * tau, tau / 100)
-plt.plot(T, u, label="Euler, pas = tau/100")
+plt.figure()
+T, u = euler(f3, u0, 0, 10 * tau, tau / 15)
+plt.plot(T, u, label="Euler, pas = tau/15", color="lightsteelblue")
+T, u = euler(f3, u0, 0, 10 * tau, tau / 30)
+plt.plot(T, u, label="Euler, pas = tau/30")
 TT, v = solan3(0, 10 * tau, tau / 100)
 plt.plot(TT, v, label="Solution analytique", ls="--")
 plt.legend()
