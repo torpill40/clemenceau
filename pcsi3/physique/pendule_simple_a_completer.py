@@ -57,16 +57,16 @@ plt.title('Pendule simple')
 ## question b
 ###########################################
 # Calcul de la solution dans l'approximation linéaire
-def solan(t):
-    return pi / 12 * cos(w0 * T)
+def solan(z0, t):
+    return z0[0] * cos(w0 * t) + z0[1] / w0 * sin(w0 * t)
 
 
-solan_T = solan(T)
+solan_T = solan(Y0, T)
 # Représentation graphique
-plt.plot(T, solan_T, ls="dashed", label=r"$\theta(t) = \theta_0 \cdot \cos(\omega_0 t)$")
+plt.plot(T, solan_T, ls="dashed", label=r"$\theta(t) = \theta_0 \cdot \cos(\omega_0 t) + \frac{\theta_0}{\omega_0} \cdot \sin(\omega_0 t)$")
 plt.fill_between(T, solan_T, Y[:, 0], where=Y[:, 0] > solan_T, fc='lightsteelblue', alpha=0.3)
 plt.fill_between(T, solan_T, Y[:, 0], where=Y[:, 0] < solan_T, fc='lightsteelblue', alpha=0.3)
-plt.legend()
+plt.legend(loc="upper left")
 
 ax = plt.subplot(1, 2, 2)
 plt.grid(True)
@@ -77,6 +77,9 @@ plt.ylabel(r'$\theta \: (rad)$')
 plt.title("Comparaison solution analytique - méthode d'Euler")
 plt.legend()
 plt.show()
+
+# La courbe modélisée par la méthode d'Euler s'éloigne de plus en plus de la solution analytique.
+# En diminuant le pas on améliore la précision et en l'augmentant, la courbe s'éloigne encore plus, voire diverge complètement.
 
 ###########################################
 ## question c
@@ -89,13 +92,13 @@ ax = plt.subplot(1, 2, 1)
 plt.grid(True)
 ax.set_axisbelow(True)
 plt.plot(T, Y[:, 0], label="odeint")
-plt.plot(T, solan_T, ls="dashed", label=r"$\theta(t) = \theta_0 \cdot \cos(\omega_0 t)$")
+plt.plot(T, solan_T, ls="dashed", label=r"$\theta(t) = \theta_0 \cdot \cos(\omega_0 t) + \frac{\theta_0}{\omega_0} \cdot \sin(\omega_0 t)$")
 plt.xlabel(r'$temps \: (s)$')
 plt.ylabel(r'$\theta \: (rad)$')
 plt.title('Pendule simple')
 plt.fill_between(T, solan_T, Y[:, 0], where=Y[:, 0] > solan_T, fc='lightsteelblue', alpha=0.3)
 plt.fill_between(T, solan_T, Y[:, 0], where=Y[:, 0] < solan_T, fc='lightsteelblue', alpha=0.3)
-plt.legend()
+plt.legend(loc="upper left")
 
 ax = plt.subplot(1, 2, 2)
 plt.grid(True)
@@ -107,6 +110,8 @@ plt.title("Comparaison solution analytique - odeint")
 plt.legend()
 plt.show()
 
+# odeint est bien plus précise que la méthode d'Euler.
+
 ###########################################
 ## question d
 ###########################################
@@ -115,7 +120,7 @@ plt.grid(True)
 plt.gca().set_axisbelow(True)
 
 wc = 6
-Y[0] = 0
+Y0[0] = 0
 n = 7
 for i in range(n, 0, -1):
     Y0[1] = i * wc / n
@@ -127,3 +132,5 @@ plt.ylabel(r'$\theta \: (rad)$')
 plt.title('Pendule simple')
 plt.legend()
 plt.show()
+
+# On remarque que plus Theta point 0 est grand, plus l'amplitude est forte.
