@@ -6,7 +6,7 @@ import time
 def f_Maximum1(L):
     Taille = len(L)
     for i in range(Taille):
-        est_plus_grand = True   # est_plus_grand est une variable booléenne 
+        est_plus_grand = True   # est_plus_grand est une variable booléenne
         for j in range(Taille):
             if L[i]<L[j]:
                 est_plus_grand = False
@@ -16,11 +16,10 @@ def f_Maximum1(L):
 
 # fonction qui recherche le maximum dans une liste avec le 2ème algorithme
 def f_Maximum2(L):
-    Taille = len(L)
     max_prev = L[0]
-    for i in range(1, Taille):
-        if L[i] > max_prev:
-            max_prev = L[i]
+    for x in L:
+        if x > max_prev:
+            max_prev = x
     return max_prev
     
 

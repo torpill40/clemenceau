@@ -125,7 +125,7 @@ n = 7
 for i in range(n, 0, -1):
     Y0[1] = i * wc / n
     Y = np.array(odeint(F, Y0, T))
-    plt.plot(T, Y[:, 0], label=rf"${i=}$", c=f"#{i * 0xb0 // n << 16 | i * 0xc4 // n << 8 | i * 0xde // n:06x}")
+    plt.plot(Y[:, 0], Y[:, 1], label=rf"${i=}$", c=f"#{i * 0xb0 // n << 16 | i * 0xc4 // n << 8 | i * 0xde // n:06x}")
 
 plt.xlabel(r'$temps \: (s)$')
 plt.ylabel(r'$\theta \: (rad)$')

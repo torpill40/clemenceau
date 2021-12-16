@@ -42,7 +42,7 @@ def perf(f, L):
     return t1 - t0, ret
 
 
-N = 1_000
+N = 30_000
 range_N = range(N)
 L1 = [rint(0, N * 10) for _ in range_N]
 # L1 = [N - i for i in range(N)]
@@ -55,11 +55,10 @@ plt.figure(figsize=(17, 6))
 
 plt.subplot(1, 2, 1)
 plt.title("Avant tri")
-plt.plot(range_N, L1)
+plt.scatter(range_N, L1, s=0.2)
 
 plt.subplot(1, 2, 2)
 plt.title("Après tri")
-plt.plot(range_N, L2)
-plt.plot([0, N - 1], [0, N * 10])
+plt.scatter(range_N, L2, s=0.2)
 
 plt.show()
