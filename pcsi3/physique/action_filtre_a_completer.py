@@ -4,13 +4,22 @@
 import numpy as np  # numpy est chargé avec l'alias np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
+import sys
+
+
+# Nous avons fait cette capacité numérique à plusieurs (Ghislain, Antoine C., Enzo et Louis-Maël)
+# et donc, nous ne rendons qu'un seul programme pour ne pas vous envoyer 4 fois le même programme.
+# Nous avons vérifier la compatibilité de ce programme avec des versions plus anciennes de Python,
+# allant jusqu'à la version 3.5.6, donc il ne devrait pas y avoir de souci pour l'éxécution.
+
+py_ver = sys.version_info
 
 G0 = 1
 fc = 1  # Fréquence de coupure en kHz
 
 
 ###########################################
-## question a
+## question a (Ghislain, Antoine)
 ###########################################
 # Définition de la fonction gain G(f,n) f = fréquence, n = ordre du filtre
 def gain(f, n):
@@ -31,7 +40,7 @@ plt.xlim(0, 2)
 plt.show()
 
 ###########################################
-## question b
+## question b (Ghislain, Antoine, Louis-Maël)
 ###########################################
 # Tracé du graphe GdB en fonction de f (échelle log) pour différentes valeurs de n
 f = np.logspace(-2, 1, 500)  # Pour répartir régulièrement les points  calculés sur une échelle log
@@ -39,22 +48,27 @@ n = 7
 
 plt.figure(figsize=(11, 6))
 plt.title("Diagramme de Bode du filtre en fonction de son ordre")
-plt.xlabel("Fréquence (en kHz)", loc="right")
-plt.ylabel("Gain (en dB)", loc="bottom")
+ax = plt.gca()
+ax.spines["bottom"].set_position("zero")
+if py_ver.minor > 5:
+    plt.xlabel("Fréquence (en kHz)", loc="right")
+    plt.ylabel("Gain (en dB)", loc="bottom")
+    ax.spines["left"].set_position(("data", 1))
+else:
+    plt.xlabel("Fréquence (en kHz)")
+    plt.ylabel("Gain (en dB)")
+    plt.axvline(1, color="k", lw=0.5)
 plt.grid(True, which='both')
 for i in range(n):
     plt.plot(f, 20 * np.log(gain(f, i + 1)), label=r"$G_{dB}(f,{" + str(i + 1) + "})$",
              c="#{:06x}".format(i * 0xb0 // n << 16 | i * 0xc4 // n << 8 | i * 0xde // n))
-ax = plt.gca()
-ax.spines["left"].set_position(("data", 1))
-ax.spines["bottom"].set_position("zero")
 plt.legend()
 plt.semilogx()  # échelle logarithmique pour la fréquence
 plt.xlim(1.e-2, 1.e1)
 plt.show()
 
 ###########################################
-## question c
+## question c (Antoine)
 ###########################################
 # Définition des paramètres
 R = 5 * 10 ** 3
@@ -87,14 +101,14 @@ plt.ylabel("Tension d'entrée (V)")
 plt.plot(t, e(t, f), label=r"$e(t)$")
 plt.legend()
 plt.xlim(0, dt)
-plt.ylim(A1 + A2, -A1 - A2)
+plt.ylim(-A1 - A2, A1 + A2)
 plt.xticks([i * T / 2 for i in range(7)], [r"$0$", r"$\frac{T}{2}$", r"$T$", r"$\frac{3T}{2}$", r"$2T$",
                                            r"$\frac{5T}{2}$", r"$3T$"])
 plt.show()
 
 
 ###########################################
-## question d
+## question d (Louis-Maël)
 ###########################################
 def G(f):  # Calcul du gain à la fréquence f
     return 1 / ((1 + (f / fc) ** 2) ** 0.5)
@@ -118,13 +132,15 @@ plt.grid(True)
 plt.xlabel("Temps (s)")
 plt.ylabel("Tension (V)")
 plt.plot(t, e(t, f), label=r"$e(t)$")
-plt.plot(t, s(t, f), label=r"$s(t)$")
+plt.plot(t, s(t, f), label=r"$s(t)$", ls="--")
 plt.fill_between(t, e(t, f), s(t, f), color="lightsteelblue", alpha=0.2, label="Différence")
 plt.legend()
 plt.xlim(0, dt)
-plt.ylim(A1 + A2, -A1 - A2)
+plt.ylim(-A1 - A2, A1 + A2)
 plt.xticks([i * T / 2 for i in range(7)], [r"$0$", r"$\frac{T}{2}$", r"$T$", r"$\frac{3T}{2}$", r"$2T$",
                                            r"$\frac{5T}{2}$", r"$3T$"])
+
+# Traçage de la différence
 plt.subplot(1, 2, 2)
 plt.grid(True)
 plt.xlabel("Temps (s)")
@@ -132,13 +148,15 @@ plt.ylabel("Différence de tension (V)")
 plt.plot(t, e(t, f) - s(t, f), label=r"$e(t)-s(t)$", color="lightsteelblue")
 plt.legend()
 plt.xlim(0, dt)
-plt.ylim(A1 + A2, -A1 - A2)
+plt.ylim(-(A1 + A2) * 1.e-3, (A1 + A2) * 1.e-3)
 plt.xticks([i * T / 2 for i in range(7)], [r"$0$", r"$\frac{T}{2}$", r"$T$", r"$\frac{3T}{2}$", r"$2T$",
                                            r"$\frac{5T}{2}$", r"$3T$"])
 plt.show()
 
+# Pour une fréquence de 100 Hz, le signal en entrée est très peu affecté par le filtre.
+
 ###########################################
-## question e
+## question e (Louis-Maël)
 ###########################################
 # Comparaison des signaux d'entrée et de sortie pour différentes fréquences f
 f = 100
@@ -149,19 +167,22 @@ t = np.linspace(0, dt, 500)
 plt.figure(figsize=(11, 6))
 
 
-ax = plt.axes([0.1, 0.15, 0.8, 0.8])
+ax = plt.axes([0.1, 0.20, 0.8, 0.75])
 plt.title("Comparaison des signaux d'entrée et de sortie en fonction de la fréquence")
 plt.grid(True)
+plt.xlabel("Temps (s)")
+plt.ylabel("Tension (V)")
 
 e_f, = ax.plot(t, e(t, f), label=r"$e(t)$")
 s_f, = ax.plot(t, s(t, f), label=r"$s(t)$")
 ax.set_xlim(0, dt)
-ax.set_ylim(A1 + A2, -A1 - A2)
+ax.set_ylim(-A1 - A2, A1 + A2)
 plt.xticks([i * T / 2 for i in range(7)], [r"$0$", r"$\frac{T}{2}$", r"$T$", r"$\frac{3T}{2}$", r"$2T$",
                                            r"$\frac{5T}{2}$", r"$3T$"])
+plt.legend()
 
 ax_slider = plt.axes([0.25, 0.05, 0.6, 0.03])
-slider = Slider(ax_slider, "Fréquence", 1.e-4, 1.e4, valinit=f)
+slider = Slider(ax_slider, "Fréquence", 1.e-4, 3.e3, valinit=f)
 
 
 def update_freq(evt):
@@ -180,16 +201,18 @@ def update_freq(evt):
 slider.on_changed(update_freq)
 plt.show()
 
+###########################################
+## question f (Louis-Maël, Enzo)
+###########################################
+U = 4
 
-###########################################
-## question f
-###########################################
+
 # Définition du signal carre
 def signal_carre(t, f, n):
     carre = 0
     for i in range(n + 1):
         carre += np.sin((2 * i + 1) * 2 * np.pi * f * t) / (1 + 2 * i)
-    return (4 / np.pi) * carre
+    return (4 * U / np.pi) * carre
 
 
 # Allure du signal carre(t) pour différentes valeurs de n
@@ -198,56 +221,68 @@ T = 1 / f
 dt = 2 * T
 t = np.linspace(0, dt, 500)
 
-plt.figure(figsize=(11, 6))
+fig = plt.figure(figsize=(11, 6))
 nmax = 8
 for j in range(nmax):
-    plt.subplot(2, 4, j + 1)
+    ax = plt.subplot(2, 4, j + 1)
     plt.plot(t, signal_carre(t, f, j))
     if j == 1:
         plt.title(str(j) + " harmonique")
     else:
         plt.title(str(j) + " harmoniques")
     plt.xticks([i * T / 2 for i in range(5)], [r"$0$", r"$\frac{T}{2}$", r"$T$", r"$\frac{3T}{2}$", r"$2T$"])
+fig.tight_layout(pad=0.75)
 plt.show()
 
 
 ###########################################
-## question g
+## question g (Enzo)
 ###########################################
+f = 100
+T = 1 / f
+dt = 3 * T
+t = np.linspace(0, dt, 500)
+
+
 # Calcul du signal en sortie
-def s_carre(t, f):
+def s_carre(t, f, n):
     carre = 0
     for i in range(n + 1):
         carre += G(2 * i * f) * np.sin((2 * i + 1) * 2 * np.pi * f * t + phi(2 * i * f)) / (1 + 2 * i)
-    return (4 / np.pi) * carre
+    return (4 * U / np.pi) * carre
 
 
 # Allure du signal en sortie
 plt.figure(figsize=(11, 6))
 plt.title("Passage d'un signal carré par le filtre")
 plt.plot(t, signal_carre(t, f, 6), label=r"$e(t)$")
-plt.plot(t, s_carre(t, 100), label=r"$s(t)$")
+plt.plot(t, s_carre(t, f, 6), label=r"$s(t)$")
 plt.grid(True)
+plt.xlabel("Temps (s)")
+plt.ylabel("Tension (V)")
 plt.legend()
+plt.xlim(0, dt)
+plt.ylim(-U * 1.35, U * 1.35)
+plt.xticks([i * T / 2 for i in range(7)], [r"$0$", r"$\frac{T}{2}$", r"$T$", r"$\frac{3T}{2}$", r"$2T$",
+                                           r"$\frac{5T}{2}$", r"$3T$"])
 plt.show()
 
 # Influence de la fréquence sur le signal de sortie
-f = 100
-T = 1 / f
-dt = 3 * T
-t = np.linspace(0, dt, 500)
-
 plt.figure(figsize=(11, 6))
 
-ax = plt.axes([0.1, 0.15, 0.8, 0.8])
+ax = plt.axes([0.1, 0.20, 0.8, 0.75])
 plt.title("Influence de la fréquence sur le signal de sortie")
 plt.grid(True)
+plt.xlabel("Temps (s)")
+plt.ylabel("Tension (V)")
 
-e_f, = ax.plot(t, signal_carre(t, f, 6))
-s_f, = ax.plot(t, s_carre(t, f))
+e_f, = ax.plot(t, signal_carre(t, f, 6), label=r"$e(t)$")
+s_f, = ax.plot(t, s_carre(t, f, 6), label=r"$s(t)$")
 ax.set_xlim([0, dt])
-ax.set_xticks([i * T / 2 for i in range(7)])
-ax.set_xticklabels([r"$0$", r"$\frac{T}{2}$", r"$T$", r"$\frac{3T}{2}$", r"$2T$", r"$\frac{5T}{2}$", r"$3T$"])
+ax.set_ylim([-U * 1.35, U * 1.35])
+plt.xticks([i * T / 2 for i in range(7)], [r"$0$", r"$\frac{T}{2}$", r"$T$", r"$\frac{3T}{2}$", r"$2T$",
+                                           r"$\frac{5T}{2}$", r"$3T$"])
+plt.legend()
 
 ax_slider = plt.axes([0.25, 0.05, 0.6, 0.03])
 slider = Slider(ax_slider, "Fréquence", 1.e-4, 3.e3, valinit=f)
@@ -259,7 +294,7 @@ def update_freq_enzo(evt):
     dt = 3 * T
     t = np.linspace(0, dt, 500)
     e_f.set_data(t, signal_carre(t, f, 6))
-    s_f.set_data(t, s_carre(t, f))
+    s_f.set_data(t, s_carre(t, f, 6))
     ax.set_xlim([0, dt])
     ax.set_xticks([i * T / 2 for i in range(7)])
     ax.set_xticklabels([r"$0$", r"$\frac{T}{2}$", r"$T$", r"$\frac{3T}{2}$", r"$2T$", r"$\frac{5T}{2}$", r"$3T$"])
