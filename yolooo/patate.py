@@ -1,5 +1,12 @@
+from cycler import cycler
 import matplotlib.pyplot as plt
 import numpy as np
+
+default_cycler = (cycler(color=['r', 'g', 'b', 'y']) +
+                  cycler(linestyle=['-', '--', ':', '-.']))
+
+plt.rc('lines', linewidth=4)
+plt.rc('axes', prop_cycle=default_cycler)
 
 n = 100
 prixunitaire = 3.99
