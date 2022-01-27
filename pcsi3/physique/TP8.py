@@ -1,20 +1,42 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-T = np.array([1, 2, 3, 4, 5])
-u_T = 1
 
-t = np.array([1, 1, 1, 1, 1])
-u_t = 1
+def y(a, b):
+    return np.log(a / b)
+
+
+T = np.array([1, 2, 3, 4, 5])
+u_T = 0.5
+Delta_T = u_T * 3 ** 0.5
+
+t = np.array([2, 2, 2, 2, 2])
+u_t = 0.5
+Delta_t = u_t * 3 ** 0.5
+
 
 # Abscisse
-x = np.log(T / t)
-u_x = np.log(u_T / u_t)
+x = np.array([3, 5, 7, 9, 11])
+u_x = 0.5
+
+# Calculs avec une distribution de probabilité uniforme
+N = 1000
+C = len(T)
+
+Calcul = np.zeros((N, C))
+for i in range(N):
+    T_i = np.random.uniform(T - Delta_T, T + Delta_T)
+    t_i = np.random.uniform(t - Delta_t, t + Delta_t)
+    calc = y(T_i, t_i)
+    for j in range(C):
+        Calcul[i][j] = calc[j]
 
 # Ordonnée
-y = np.array([3, 5, 7, 9, 11])
-y = x / 2
-u_y = 0.5
+# y = y(T, t)
+# u_y = y(u_T, u_t)
+y = np.array([np.mean(Calcul[:, i]) for i in range(C)])
+u_y = np.array([np.std(Calcul[:, i], ddof=1) for i in range(C)])
+print(y)
 
 # Calcul de la valeur centrale de la mesure par régression linéaire y = ax+b
 a, b = np.polyfit(x, y, 1)
