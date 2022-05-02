@@ -63,7 +63,8 @@ def solan(z0, t):
 
 solan_T = solan(Y0, T)
 # Représentation graphique
-plt.plot(T, solan_T, ls="dashed", label=r"$\theta(t) = \theta_0 \cdot \cos(\omega_0 t) + \frac{\theta_0}{\omega_0} \cdot \sin(\omega_0 t)$")
+plt.plot(T, solan_T, ls="dashed",
+         label=r"$\theta(t) = \theta_0 \cdot \cos(\omega_0 t) + \frac{\theta_0}{\omega_0} \cdot \sin(\omega_0 t)$")
 plt.fill_between(T, solan_T, Y[:, 0], where=Y[:, 0] > solan_T, fc='lightsteelblue', alpha=0.3)
 plt.fill_between(T, solan_T, Y[:, 0], where=Y[:, 0] < solan_T, fc='lightsteelblue', alpha=0.3)
 plt.legend(loc="upper left")
@@ -92,7 +93,8 @@ ax = plt.subplot(1, 2, 1)
 plt.grid(True)
 ax.set_axisbelow(True)
 plt.plot(T, Y[:, 0], label="odeint")
-plt.plot(T, solan_T, ls="dashed", label=r"$\theta(t) = \theta_0 \cdot \cos(\omega_0 t) + \frac{\theta_0}{\omega_0} \cdot \sin(\omega_0 t)$")
+plt.plot(T, solan_T, ls="dashed",
+         label=r"$\theta(t) = \theta_0 \cdot \cos(\omega_0 t) + \frac{\theta_0}{\omega_0} \cdot \sin(\omega_0 t)$")
 plt.xlabel(r'$temps \: (s)$')
 plt.ylabel(r'$\theta \: (rad)$')
 plt.title('Pendule simple')

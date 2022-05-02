@@ -19,7 +19,7 @@ def ecart_type(liste: list[float]) -> float:
 
 
 # Récupération des données
-monfichier = open('NotesDS1.txt','r')
+monfichier = open('NotesDS1.txt', 'r')
 # On créé 2 listes vides pour stocker les noms et les notes.
 prenoms = []
 notes = []
