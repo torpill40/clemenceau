@@ -4,15 +4,16 @@ import matplotlib.pyplot as plt
 
 
 class Rayon:
-    __slots__ = ["m", "p", "color"]
+    __slots__ = ["m", "p", "color", "alpha"]
 
-    def __init__(self, m: float, p: float, color: str = 'r'):
+    def __init__(self, m: float, p: float, color: str = 'k', alpha: float = 1.):
         self.m = m
         self.p = p
         self.color = color
+        self.alpha = alpha
 
     def draw(self, x1: float, x2: float):
-        plt.plot([x1, x2], [self.m * x1 + self.p, self.m * x2 + self.p], color=self.color)
+        plt.plot([x1, x2], [self.m * x1 + self.p, self.m * x2 + self.p], color=self.color, alpha=self.alpha)
 
 
 class Lentille:
@@ -31,7 +32,7 @@ class Lentille:
         else:
             y_focal = rayon.m * self.focal
             m = (y_focal - y_intersect) / self.focal
-            return Rayon(m, y_intersect - m * self.x)
+            return Rayon(m, y_intersect - m * self.x, rayon.color, rayon.alpha)
 
     def draw(self):
         plt.arrow(self.x, self.y, 0, self.radius, head_width=0.3, head_length=0.3)
@@ -54,8 +55,8 @@ if __name__ == '__main__':
     l1.draw()
     l2.draw()
 
-    for i in range(-10, 11):
-        r1 = Rayon(-1 / 2, i * 0.4)
+    for i in range(-500, 550):
+        r1 = Rayon(-1 / 2, i * 0.4 / 50, alpha=0.02)
         r2 = l0.refracted(r1)
         r3 = l1.refracted(r2)
         r4 = l2.refracted(r3)
