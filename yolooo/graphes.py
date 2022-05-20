@@ -7,6 +7,33 @@ import matplotlib.animation as ani
 from random import randrange
 
 
+class Graph:
+    __slots__ = ['__width', '__height', '__graph']
+
+    def __init__(self, width: int, height: int):
+        self.__width = width
+        self.__height = height
+        self.__graph = {i: [] for i in range(self.__width * self.__height)}
+
+    def __call__(self, *args, **kwargs):
+        return self.__graph
+
+    def __getitem__(self, item):
+        return self.__graph[item]
+
+    def __iadd__(self, edge: tuple):
+        if edge[1] not in self.__graph[edge[0]]:
+            self.__graph[edge[0]].append(edge[1])
+            self.__graph[edge[1]].append(edge[0])
+        return self
+
+    def width(self):
+        return self.__width
+
+    def height(self):
+        return self.__height
+
+
 def hsv_color(hue, sat, val):
     c = val * sat
     x = c * (1 - abs((hue / 60) % 2 - 1))
@@ -27,21 +54,24 @@ def hsv_color(hue, sat, val):
     return f"#{int((r + m) * 0xFF):02X}{int((g + m) * 0xFF):02X}{int((b + m) * 0xFF):02X}"
 
 
-def dessiner(G):
-    w, h = G['dim']
-    position = {w * x + y: (x, y) for y in range(w) for x in range(h)}
+def dessiner(graph: Graph):
+    w = graph.width()
+    h = graph.height()
+    position = {h * x + y: (x, y) for y in range(h) for x in range(w)}
     plt.axis('equal')
-    nx.draw(nx.Graph(G['G']), pos=position, with_labels=False, node_shape='s', node_color='w', edgecolors='k', node_size=100)
+    nx.draw(nx.Graph(graph()), pos=position, with_labels=False, node_shape='s', node_color='k', edgecolors='k',
+            node_size=100, width=7, linewidths=0)
     plt.show()
 
 
-def animer(G, parcours):
-    fig = plt.figure()
-    plt.axis('equal')
-    graph = G['G']
-    nxG = nx.Graph(graph)
-    w, h = G['dim']
-    position = {w * x + y: (x, y) for y in range(w) for x in range(h)}
+def animer(graph: Graph, parcours):
+    w = graph.width()
+    h = graph.height()
+    position = {h * x + y: (x, y) for y in range(h) for x in range(w)}
+    nxG = nx.Graph(graph())
+    E = [e for e in nxG.edges()]
+
+    fig = plt.figure(figsize=(14, 8))
 
     def numerotation(G):
         dico = {}
@@ -50,51 +80,58 @@ def animer(G, parcours):
             dico[L[i]] = i
         return dico
 
-    num = numerotation(graph)
-    colmap = ['w' for _ in graph]
+    num = numerotation(graph())
+    colmap = ['w' for _ in graph()]
+    edgecolmap = ['w' for _ in E]
 
     def animate(frame):
-        nonlocal colmap
+        nonlocal colmap, edgecolmap
         fig.clear()
+        plt.axes([0, 0, 1, 1])
         plt.axis('equal')
         if frame == 0:
-            colmap = ['w' for _ in graph]
+            colmap = ['k' for _ in graph()]
+            edgecolmap = ['k' for _ in E]
         else:
-            colmap[num[parcours[frame - 1][0]]] = hsv_color(parcours[frame - 1][1] % 360, .5, 1.)
-        nx.draw(nxG, pos=position, with_labels=False, node_shape='s', node_color=colmap, edgecolors='k', node_size=100)
+            u, v, c = parcours[frame - 1]
+            hsv = hsv_color(c % 360, .5, 1.)
+            colmap[num[v]] = hsv
+            if (u, v) in E:
+                edgecolmap[E.index((u, v))] = hsv
+            elif (v, u) in E:
+                edgecolmap[E.index((v, u))] = hsv
+        nx.draw(nxG, pos=position, with_labels=False, node_shape='s', edge_color=edgecolmap, node_color=colmap,
+                edgecolors='k', node_size=100, width=7, linewidths=0)
 
     _ = ani.FuncAnimation(fig, animate, frames=len(parcours) + 1, interval=50, repeat=False)
     plt.show()
 
 
-def creerG(w, h, p, q):
-    dico = {i: [] for i in range(h * w)}
+def classic(graph: Graph, p, q):
+    w = graph.width()
+    h = graph.height()
     for y in range(h - 1):
         for x in range(w):
             if randrange(p) < q:
-                dico[h * x + y].append(h * x + y + 1)
-                dico[h * x + y + 1].append(h * x + y)
+                graph += (h * x + y, h * x + y + 1)
     for y in range(h):
         for x in range(w - 1):
             if randrange(p) < q:
-                dico[h * x + y].append(h * x + y + h)
-                dico[h * x + y + h].append(h * x + y)
-    for i in dico:
-        dico[i].sort()
-    return {'dim': (h, w), 'G': dico}
+                graph += (h * x + y, h * x + y + h)
+    # for i in graph():
+    #     graph[i].sort()
 
 
-def maze(w: int, h: int, c: int = 0) -> dict[str, Union[tuple[int, int], dict[int, list[int]]]]:
+def maze(graph: Graph, c: int = 0):
     """
-    Créer un labyrinthe à h lignes et w colonnes avec un maximum de n cycles.
+    Créer un labyrinthe à partir d'un graphe modifié sur place avec un maximum de n cycles.
 
-    :param w: largeur du labyrinthe
-    :param h: hauteur du labyrinthe
+    :param graph: graphe modifié sur place
     :param c: nombre maximal de cycles
-    :return: graphe du labyrinthe
     """
-    dico = {i: [] for i in range(w * h)}
-    couleur = {v: 'w' for v in range(w * h)}
+    couleur = {v: 'w' for v in graph()}
+    w = graph.width()
+    h = graph.height()
     x = randrange(0, w)
     y = randrange(0, h)
     reste = [x * h + y]
@@ -116,26 +153,22 @@ def maze(w: int, h: int, c: int = 0) -> dict[str, Union[tuple[int, int], dict[in
                 dir_ = randrange(0, 4)
                 if dir_ == 0 and right:
                     reste.append(x * h + y + 1)
-                    dico[x * h + y].append(x * h + y + 1)
-                    dico[x * h + y + 1].append(x * h + y)
+                    graph += (x * h + y, x * h + y + 1)
                     couleur[x * h + y + 1] = 'g'
                     flag = False
                 elif dir_ == 1 and left:
                     reste.append(x * h + y - 1)
-                    dico[x * h + y].append(x * h + y - 1)
-                    dico[x * h + y - 1].append(x * h + y)
+                    graph += (x * h + y, x * h + y - 1)
                     couleur[x * h + y - 1] = 'g'
                     flag = False
                 if dir_ == 2 and up:
                     reste.append(x * h + y - h)
-                    dico[x * h + y].append(x * h + y - h)
-                    dico[x * h + y - h].append(x * h + y)
+                    graph += (x * h + y, x * h + y - h)
                     couleur[x * h + y - h] = 'g'
                     flag = False
                 if dir_ == 3 and down:
                     reste.append(x * h + y + h)
-                    dico[x * h + y].append(x * h + y + h)
-                    dico[x * h + y + h].append(x * h + y)
+                    graph += (x * h + y, x * h + y + h)
                     couleur[x * h + y + h] = 'g'
                     flag = False
     for _ in range(c):
@@ -144,61 +177,64 @@ def maze(w: int, h: int, c: int = 0) -> dict[str, Union[tuple[int, int], dict[in
         dir_ = randrange(0, 2)
         s1 = x * h + y
         s2 = s1 + dir_ * (h - 1) + 1
-        if s1 in dico[s2]:
+        if s1 in graph[s2]:
             s2 = s1 + dir_ * (1 - h) + h
-        if s1 not in dico[s2]:
-            dico[s1].append(s2)
-            dico[s2].append(s1)
-    return {'dim': (h, w), 'G': dico}
+        graph += (s1, s2)
 
 
 def bfs(G, s, couleur, reponse):
     file = deque()
     couleur['s'] = 'g'
-    file.append((s, 0))
+    file.append((s, s, 0))
     while len(file) > 0:
-        v, teinte = file.popleft()
+        u, v, teinte = file.popleft()
         if couleur[v] != 'k':
             couleur[v] = 'k'
-            reponse.append((v, teinte))
-            teinte += 1
+            reponse.append((u, v, teinte))
+            teinte += 0.5
             for w in G[v]:
                 if couleur[w] != 'k':
                     couleur[w] = 'g'
-                    file.append((w, teinte))
+                    file.append((v, w, teinte))
 
 
 def dfs(G, s, couleur, reponse):
     pile = deque()
     couleur['s'] = 'g'
-    pile.append((s, 0))
+    pile.append((s, s, 0))
     while len(pile) > 0:
-        v, teinte = pile.pop()
+        u, v, teinte = pile.pop()
         if couleur[v] != 'k':
             couleur[v] = 'k'
-            reponse.append((v, teinte))
-            teinte += 1
+            reponse.append((u, v, teinte))
+            teinte += 0.5
             for w in G[v]:
                 if couleur[w] != 'k':
                     couleur[w] = 'g'
-                    pile.append((w, teinte))
+                    pile.append((v, w, teinte))
 
 
-def parcours(G, parcours_depuis_sommet):
-    couleur = {v: 'w' for v in G}
+def parcours(graph: Graph, parcours_depuis_sommet):
+    couleur = {v: 'w' for v in graph()}
     reponse = []
-    for s in G:
+    for s in graph():
         if couleur[s] != 'k':
-            parcours_depuis_sommet(G, s, couleur, reponse)
+            parcours_depuis_sommet(graph(), s, couleur, reponse)
     return reponse
 
 
 def main():
-    G1 = creerG(15, 6, 5, 3)
-    G2 = maze(60, 30)
-    G3 = maze(60, 30, 50)
+    # G1 = Graph(15, 6)
+    # maze(G1, 3)
+    # dessiner(G1)
+    # animer(G1, parcours(G1, bfs))
+    G2 = Graph(40, 30)
+    maze(G2)
+    animer(G2, parcours(G2, bfs))
+    # G3 = Graph(20, 10)
+    # classic(G3, 5, 3)
     # dessiner(G3)
-    animer(G3, parcours(G3['G'], bfs))
+    # animer(G3, parcours(G3, bfs))
 
 
 if __name__ == '__main__':
