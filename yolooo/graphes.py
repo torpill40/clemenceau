@@ -99,12 +99,12 @@ def draw(graph: Graph):
 
 
 def animate(graph: Graph,
-            pathway_from: Callable[[dict[int, list[int]],
-                                    int,
-                                    dict[int, str],
-                                    list[tuple[int, int, float]]], None]
+            path_from: Callable[[dict[int, list[int]],
+                                 int,
+                                 dict[int, str],
+                                 list[tuple[int, int, float]]], None]
             ):
-    pathway_ = pathway(graph, pathway_from)
+    path_ = path(graph, path_from)
     w = graph.width()
     h = graph.height()
     position = {x + y * w: (x, y) for x in range(w) for y in range(h)}
@@ -132,7 +132,7 @@ def animate(graph: Graph,
             colormap = ['k' for _ in graph()]
             edge_colormap = ['k' for _ in graph.edges()]
         else:
-            u, v, c = pathway_[frame - 1]
+            u, v, c = path_[frame - 1]
             rgb = hsv_color(int(c) % 360, .5, 1.)
             colormap[num[v]] = rgb
             if (u, v) in graph:
@@ -140,7 +140,7 @@ def animate(graph: Graph,
         nx.draw(nx_g, pos=position, with_labels=False, edgelist=graph.edges(), node_shape='s', edge_color=edge_colormap,
                 node_color=colormap, edgecolors='k', node_size=100, width=7, linewidths=0)
 
-    _ = ani.FuncAnimation(fig, animate_, frames=len(pathway_) + 1, interval=50, repeat=False)
+    _ = ani.FuncAnimation(fig, animate_, frames=len(path_) + 1, interval=50, repeat=False)
     plt.show()
 
 
@@ -239,17 +239,17 @@ def dfs(g: dict[int, list[int]], s: int, color: dict[int, str], ans: list[tuple[
                     stack.append((v, w, hue))
 
 
-def pathway(graph: Graph,
-            pathway_form: Callable[[dict[int, list[int]],
-                                    int,
-                                    dict[int, str],
-                                    list[tuple[int, int, float]]], None]
-            ) -> list[int, int, float]:
+def path(graph: Graph,
+         path_from: Callable[[dict[int, list[int]],
+                              int,
+                              dict[int, str],
+                              list[tuple[int, int, float]]], None]
+         ) -> list[int, int, float]:
     color = {v: 'w' for v in graph()}
     ans = []
     for s in graph():
         if color[s] != 'k':
-            pathway_form(graph(), s, color, ans)
+            path_from(graph(), s, color, ans)
     return ans
 
 
