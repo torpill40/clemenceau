@@ -244,7 +244,7 @@ def path(graph: Graph,
                               int,
                               dict[int, str],
                               list[tuple[int, int, float]]], None]
-         ) -> list[int, int, float]:
+         ) -> list[tuple[int, int, float]]:
     color = {v: 'w' for v in graph()}
     ans = []
     for s in graph():
